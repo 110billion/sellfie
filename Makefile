@@ -10,7 +10,7 @@ IMG_USER_MANAGER ?= $(REGISTRY)/user-manager:$(VERSION)
 docker-build: docker-build-user-manager
 
 docker-build-user-manager:
-	docker build . -f build/usermanager/Dockerfile -t ${IMG_USER_MANAGER}
+	docker build . -f build/Dockerfile -t ${IMG_USER_MANAGER}
 
 # Push the docker image
 .PHONY: docker-push
