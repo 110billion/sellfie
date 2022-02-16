@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: usermanagerservice
+spec:
+  selector:
+    matchLabels:
+      app: usermanagerservice
+  template:
+    metadata:
+      labels:
+        app: usermanagerservice
+    spec:
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 5
+      containers:
+        - name: server
+          image: changjjjjjjjj/user-manager:v0.0.1-alpha
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3550
+          env:
+            - name: PORT
+              value: "3550"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+      imagePullSecrets:
+        - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: usermanagerservice
+spec:
+  type: NodePort
+  selector:
+    app: usermanagerservice
+  ports:
+    - name: server
+      port: 3550
+      nodePort: 31250
+      targetPort: 3550
