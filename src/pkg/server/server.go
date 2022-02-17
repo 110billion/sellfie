@@ -46,11 +46,14 @@ type server struct {
 // New is a constructor of Server
 func New() Server {
 	login.InitGoogleOauthConfig()
+	login.InitFacebookOauthConfig()
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", login.MainView)
 	r.HandleFunc("/auth/google/login", login.GoogleLoginHandler)
 	r.HandleFunc("/auth/google/callback", login.GoogleAuthCallback)
+	r.HandleFunc("/auth/facebook/login", login.FBLoginHandler)
+	r.HandleFunc("/auth/facebook/callback", login.FBAuthCallback)
 
 	return &server{
 		router: r,

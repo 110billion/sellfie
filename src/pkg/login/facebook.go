@@ -21,37 +21,34 @@ import (
 	"encoding/json"
 	"github.com/gorilla/sessions"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
+	"golang.org/x/oauth2/facebook"
 	"io/ioutil"
 	"log"
 	"net/http"
 )
 
-const (
-	googleRedirectURL         = "{domain}/auth/google/callback" // TODO: Pull From loadbalancer or etc.
-	googleUserInfoAPIEndpoint = "https://www.googleapis.com/oauth2/v3/userinfo"
-	googleScopeEmail          = "https://www.googleapis.com/auth/userinfo.email"
-	googleScopeProfile        = "https://www.googleapis.com/auth/userinfo.profile"
-)
-
 var (
-	googleOauthConfig *oauth2.Config
-	store             = sessions.NewCookieStore([]byte("secret"))
+	facebookOauthConfig *oauth2.Config
 )
 
-// InitGoogleOauthConfig set google Oauth2 config when server starts
-func InitGoogleOauthConfig() {
-	googleOauthConfig = &oauth2.Config{
+const (
+	facebookRedirectURL         = "{domain}/auth/facebook/callback" // TODO: Pull From loadbalancer or etc.
+	facebookUserInfoAPIEndpoint = "https://graph.facebook.com/me?fields=id,name,email"
+)
+
+// InitFacebookOauthConfig set facebook Oauth2 config when server starts
+func InitFacebookOauthConfig() {
+	facebookOauthConfig = &oauth2.Config{
 		ClientID:     "", // TODO: Pull from secret
 		ClientSecret: "",
-		RedirectURL:  googleRedirectURL,
-		Scopes:       []string{googleScopeEmail, googleScopeProfile},
-		Endpoint:     google.Endpoint,
+		RedirectURL:  facebookRedirectURL,
+		Scopes:       []string{"email", "public_profile"},
+		Endpoint:     facebook.Endpoint,
 	}
 }
 
-// GoogleLoginHandler handles redirection to google login
-func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
+// FBLoginHandler handles redirection to google login
+func FBLoginHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session")
 	session.Options = &sessions.Options{
 		MaxAge: 300,
@@ -62,11 +59,11 @@ func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		return
 	}
-	http.Redirect(w, r, getLoginURL(googleOauthConfig, state), http.StatusTemporaryRedirect)
+	http.Redirect(w, r, getLoginURL(facebookOauthConfig, state), http.StatusTemporaryRedirect)
 }
 
-// GoogleAuthCallback handles login check and redirection to main page
-func GoogleAuthCallback(w http.ResponseWriter, r *http.Request) {
+// FBAuthCallback handles redirection to google login
+func FBAuthCallback(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, "session")
 	if err != nil {
 		log.Println(err.Error())
@@ -80,14 +77,14 @@ func GoogleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := googleOauthConfig.Exchange(context.Background(), r.FormValue("code"))
+	token, err := facebookOauthConfig.Exchange(context.Background(), r.FormValue("code"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	cli := googleOauthConfig.Client(context.Background(), token)
-	userInfoResp, err := cli.Get(googleUserInfoAPIEndpoint)
+	cli := facebookOauthConfig.Client(context.Background(), token)
+	userInfoResp, err := cli.Get(facebookUserInfoAPIEndpoint)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
