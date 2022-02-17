@@ -38,12 +38,13 @@ type Server interface {
 	Start()
 }
 
-// server is HTTP server for login API
+// UserManagingServer is HTTP server for login API
 type server struct {
 	router *mux.Router
 }
 
-func New() *server {
+// New is a constructor of Server
+func New() Server {
 	login.InitGoogleOauthConfig()
 
 	r := mux.NewRouter()

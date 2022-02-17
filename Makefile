@@ -18,3 +18,11 @@ docker-push: docker-push-user-manager
 
 docker-push-user-manager:
 	docker push ${IMG_USER_MANAGER}
+
+# Test code lint
+test-lint:
+	golint ./src/...
+
+# Unit test
+test-unit:
+	go test -v ./...

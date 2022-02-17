@@ -24,11 +24,13 @@ import (
 	"net/http"
 )
 
+// User is user info name & email
 type User struct {
 	Name  string `json:"name"`
 	Email string `json:"email"`
 }
 
+// MainView handles main page
 func MainView(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, "session")
 	if err != nil {

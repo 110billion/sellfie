@@ -28,10 +28,10 @@ import (
 )
 
 const (
-	RedirectURL         = "http://localhost:31250/auth/google/callback" // TODO: Pull From loadbalancer or etc.
-	UserInfoAPIEndpoint = "https://www.googleapis.com/oauth2/v3/userinfo"
-	ScopeEmail          = "https://www.googleapis.com/auth/userinfo.email"
-	ScopeProfile        = "https://www.googleapis.com/auth/userinfo.profile"
+	redirectURL         = "http://localhost:31250/auth/google/callback" // TODO: Pull From loadbalancer or etc.
+	userInfoAPIEndpoint = "https://www.googleapis.com/oauth2/v3/userinfo"
+	scopeEmail          = "https://www.googleapis.com/auth/userinfo.email"
+	scopeProfile        = "https://www.googleapis.com/auth/userinfo.profile"
 )
 
 var (
@@ -39,16 +39,18 @@ var (
 	store             = sessions.NewCookieStore([]byte("secret"))
 )
 
+// InitGoogleOauthConfig set google Oauth2 config when server starts
 func InitGoogleOauthConfig() {
 	googleOauthConfig = &oauth2.Config{
 		ClientID:     "", // TODO: Pull from secret
 		ClientSecret: "",
-		RedirectURL:  RedirectURL,
-		Scopes:       []string{ScopeEmail, ScopeProfile},
+		RedirectURL:  redirectURL,
+		Scopes:       []string{scopeEmail, scopeProfile},
 		Endpoint:     google.Endpoint,
 	}
 }
 
+// GoogleLoginHandler handles redirection to google login
 func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session")
 	session.Options = &sessions.Options{
@@ -63,6 +65,7 @@ func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, getLoginURL(googleOauthConfig, state), http.StatusTemporaryRedirect)
 }
 
+// GoogleAuthCallback handles login check and redirection to main page
 func GoogleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, "session")
 	if err != nil {
@@ -84,7 +87,7 @@ func GoogleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cli := googleOauthConfig.Client(context.Background(), token)
-	userInfoResp, err := cli.Get(UserInfoAPIEndpoint)
+	userInfoResp, err := cli.Get(userInfoAPIEndpoint)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
