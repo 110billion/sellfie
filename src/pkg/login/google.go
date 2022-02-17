@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	RedirectURL         = "http://localhost:3550/auth/google/callback" // TODO: Pull From loadbalancer or etc.
+	RedirectURL         = "http://localhost:31250/auth/google/callback" // TODO: Pull From loadbalancer or etc.
 	UserInfoAPIEndpoint = "https://www.googleapis.com/oauth2/v3/userinfo"
 	ScopeEmail          = "https://www.googleapis.com/auth/userinfo.email"
 	ScopeProfile        = "https://www.googleapis.com/auth/userinfo.profile"
