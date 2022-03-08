@@ -22,6 +22,26 @@ spec:
           env:
             - name: PORT
               value: "3550"
+            - name: FACEBOOK_ID
+              valueFrom:
+                secretKeyRef:
+                  name: oauth-client-secret
+                  key: facebookID
+            - name: FACEBOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: oauth-client-secret
+                  key: facebookSecret
+            - name: GOOGLE_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: oauth-client-secret
+                    key: googleID
+            - name: GOOGLE_SECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: oauth-client-secret
+                    key: googleSecret
           resources:
             requests:
               cpu: 100m
@@ -29,8 +49,21 @@ spec:
             limits:
               cpu: 200m
               memory: 128Mi
+          volumeMounts:
+            - mountPath: /etc/certs
+              name: tls-secret
+              readOnly: true
       imagePullSecrets:
         - name: regcred
+      volumes:
+        - name: tls-secret
+          secret:
+            defaultMode: 420
+            secretName: tls-secret
+        - name: oauth-secret
+          secret:
+            defaultMode: 420
+            secretName: oauth-client-secret
 ---
 apiVersion: v1
 kind: Service
@@ -43,5 +76,5 @@ spec:
   ports:
     - name: server
       port: 3550
-      nodePort: 31250
+      nodePort: 30250
       targetPort: 3550

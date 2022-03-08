@@ -21,23 +21,14 @@ import (
 	"github.com/110billion/usermanagerservice/src/internal/logrotate"
 	"github.com/110billion/usermanagerservice/src/pkg/server"
 	"io"
-	"k8s.io/apimachinery/pkg/runtime"
-	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 var (
-	scheme   = runtime.NewScheme()
 	setupLog = ctrl.Log.WithName("setup")
 )
-
-func init() {
-	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	// +kubebuilder:scaffold:scheme
-}
 
 func main() {
 	// Set log rotation
@@ -56,6 +47,10 @@ func main() {
 		os.Exit(1)
 	}
 	// Start User Manager Server
-	svr := server.New()
+	svr, err := server.New()
+	if err != nil {
+		setupLog.Error(err, "")
+		os.Exit(1)
+	}
 	svr.Start()
 }
