@@ -18,37 +18,42 @@ package login
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
+	"github.com/go-logr/logr"
 	"github.com/gorilla/sessions"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/facebook"
 	"io/ioutil"
-	"log"
+	"math/rand"
 	"net/http"
 )
 
 var (
-	facebookOauthConfig *oauth2.Config
+	// store return cookie store
+	store = sessions.NewCookieStore([]byte("secret"))
+	log   logr.Logger
 )
 
-const (
-	facebookRedirectURL         = "{domain}/auth/facebook/callback" // TODO: Pull From loadbalancer or etc.
-	facebookUserInfoAPIEndpoint = "https://graph.facebook.com/me?fields=id,name,email"
-)
-
-// InitFacebookOauthConfig set facebook Oauth2 config when server starts
-func InitFacebookOauthConfig() {
-	facebookOauthConfig = &oauth2.Config{
-		ClientID:     "", // TODO: Pull from secret
-		ClientSecret: "",
-		RedirectURL:  facebookRedirectURL,
-		Scopes:       []string{"email", "public_profile"},
-		Endpoint:     facebook.Endpoint,
-	}
+// User is user info name & email
+type User struct {
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
 
-// FBLoginHandler handles redirection to google login
-func FBLoginHandler(w http.ResponseWriter, r *http.Request) {
+// getLoginURL returns login url
+func getLoginURL(oauthConf *oauth2.Config, state string) string {
+	return oauthConf.AuthCodeURL(state)
+}
+
+// randToken returns random string for token
+func randToken() string {
+	b := make([]byte, 32)
+	rand.Read(b)
+	return base64.StdEncoding.EncodeToString(b)
+}
+
+// Login handles redirection to login page
+func Login(w http.ResponseWriter, r *http.Request, oauthConfig *oauth2.Config) {
 	session, _ := store.Get(r, "session")
 	session.Options = &sessions.Options{
 		MaxAge: 300,
@@ -56,17 +61,18 @@ func FBLoginHandler(w http.ResponseWriter, r *http.Request) {
 	state := randToken()
 	session.Values["state"] = state
 	if err := session.Save(r, w); err != nil {
-		log.Println(err.Error())
+		log.Error(err, "")
 		return
 	}
-	http.Redirect(w, r, getLoginURL(facebookOauthConfig, state), http.StatusTemporaryRedirect)
+	http.Redirect(w, r, getLoginURL(oauthConfig, state), http.StatusTemporaryRedirect)
 }
 
-// FBAuthCallback handles redirection to google login
-func FBAuthCallback(w http.ResponseWriter, r *http.Request) {
+// Callback handles login check and redirection to main page
+func Callback(w http.ResponseWriter, r *http.Request, oauthConfig *oauth2.Config, apiEndpoint string) {
 	session, err := store.Get(r, "session")
 	if err != nil {
-		log.Println(err.Error())
+		log.Error(err, "")
+		return
 	}
 
 	state := session.Values["state"]
@@ -77,14 +83,14 @@ func FBAuthCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := facebookOauthConfig.Exchange(context.Background(), r.FormValue("code"))
+	token, err := oauthConfig.Exchange(context.Background(), r.FormValue("code"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	cli := facebookOauthConfig.Client(context.Background(), token)
-	userInfoResp, err := cli.Get(facebookUserInfoAPIEndpoint)
+	cli := oauthConfig.Client(context.Background(), token)
+	userInfoResp, err := cli.Get(apiEndpoint)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -97,7 +103,8 @@ func FBAuthCallback(w http.ResponseWriter, r *http.Request) {
 	}
 	var authUser User
 	if err := json.Unmarshal(userInfo, &authUser); err != nil {
-		log.Println(err.Error())
+		log.Error(err, "")
+		return
 	}
 
 	session.Options = &sessions.Options{

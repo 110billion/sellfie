@@ -18,15 +18,21 @@ package server
 
 import (
 	"fmt"
-	"github.com/110billion/usermanagerservice/src/pkg/login"
+	"github.com/110billion/usermanagerservice/src/internal/apiserver"
+	"github.com/110billion/usermanagerservice/src/internal/utils"
+	"github.com/110billion/usermanagerservice/src/internal/wrapper"
+	"github.com/110billion/usermanagerservice/src/pkg/server/auth"
+	"github.com/110billion/usermanagerservice/src/pkg/server/auth/facebook"
+	"github.com/110billion/usermanagerservice/src/pkg/server/auth/google"
 	"github.com/gorilla/mux"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"os"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 var (
-	logger = logf.Log.WithName("server")
+	log = logf.Log.WithName("user-manager-server")
 )
 
 const (
@@ -40,32 +46,55 @@ type Server interface {
 
 // UserManagingServer is HTTP server for login API
 type server struct {
-	router *mux.Router
+	wrapper     wrapper.RouterWrapper
+	authHandler apiserver.APIHandler
 }
 
 // New is a constructor of Server
-func New() Server {
-	login.InitGoogleOauthConfig()
-	login.InitFacebookOauthConfig()
+func New() (Server, error) {
+	google.InitGoogleOauthConfig()
+	facebook.InitFacebookOauthConfig()
 
-	r := mux.NewRouter()
-	r.HandleFunc("/", login.MainView)
-	r.HandleFunc("/auth/google/login", login.GoogleLoginHandler)
-	r.HandleFunc("/auth/google/callback", login.GoogleAuthCallback)
-	r.HandleFunc("/auth/facebook/login", login.FBLoginHandler)
-	r.HandleFunc("/auth/facebook/callback", login.FBAuthCallback)
+	srv := &server{}
+	srv.wrapper = wrapper.New("/", nil, srv.rootHandler)
 
-	return &server{
-		router: r,
+	srv.wrapper.SetRouter(mux.NewRouter())
+	srv.wrapper.Router().HandleFunc("/", srv.rootHandler)
+
+	// Set apisHandler
+	authHandler, err := auth.NewHandler(srv.wrapper, log)
+	if err != nil {
+		return nil, err
 	}
+	srv.authHandler = authHandler
+
+	return srv, nil
 }
 
 func (s *server) Start() {
-	httpAddr := fmt.Sprintf("0.0.0.0:%d", port)
+	addr := fmt.Sprintf("0.0.0.0:%d", port)
 
-	logger.Info(fmt.Sprintf("Server is running on %s", httpAddr))
-	if err := http.ListenAndServe(httpAddr, s.router); err != nil {
-		logger.Error(err, "cannot launch http server")
+	log.Info(fmt.Sprintf("Server is running on %s", addr))
+	if err := http.ListenAndServe(addr, s.wrapper.Router()); err != nil { // TODO: TLS
+		log.Error(err, "cannot launch http server")
 		os.Exit(1)
+	}
+}
+
+func (s *server) rootHandler(w http.ResponseWriter, _ *http.Request) {
+	paths := metav1.RootPaths{}
+	addPath(&paths.Paths, s.wrapper)
+
+	_ = utils.RespondJSON(w, paths)
+}
+
+// addPath adds all the leaf API endpoints
+func addPath(paths *[]string, w wrapper.RouterWrapper) {
+	if w.Handler() != nil {
+		*paths = append(*paths, w.FullPath())
+	}
+
+	for _, c := range w.Children() {
+		addPath(paths, c)
 	}
 }
