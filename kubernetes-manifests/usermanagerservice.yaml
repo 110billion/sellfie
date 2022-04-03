@@ -33,22 +33,15 @@ spec:
                   name: oauth-client-secret
                   key: facebookSecret
             - name: GOOGLE_ID
-                valueFrom:
-                  secretKeyRef:
-                    name: oauth-client-secret
-                    key: googleID
+              valueFrom:
+                secretKeyRef:
+                  name: oauth-client-secret
+                  key: googleID
             - name: GOOGLE_SECRET
-                valueFrom:
-                  secretKeyRef:
-                    name: oauth-client-secret
-                    key: googleSecret
-          resources:
-            requests:
-              cpu: 100m
-              memory: 64Mi
-            limits:
-              cpu: 200m
-              memory: 128Mi
+              valueFrom:
+                secretKeyRef:
+                  name: oauth-client-secret
+                  key: googleSecret
           volumeMounts:
             - mountPath: /etc/certs
               name: tls-secret

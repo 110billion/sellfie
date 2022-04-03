@@ -32,7 +32,7 @@ var (
 )
 
 const (
-	facebookRedirectURL         = "heychangju.shop/auth/facebook/callback"
+	facebookRedirectURL         = "https://heychangju.shop/auth/facebook/callback"
 	facebookUserInfoAPIEndpoint = "https://graph.facebook.com/me?fields=id,name,email"
 )
 

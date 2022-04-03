@@ -115,5 +115,5 @@ func Callback(w http.ResponseWriter, r *http.Request, oauthConfig *oauth2.Config
 	session.Values["username"] = authUser.Name
 	_ = session.Save(r, w)
 
-	http.Redirect(w, r, "/", http.StatusFound)
+	http.Redirect(w, r, "https://heychangju.shop", http.StatusFound)
 }

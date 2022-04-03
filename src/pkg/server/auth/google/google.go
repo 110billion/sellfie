@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	googleRedirectURL         = "heychangju.shop/auth/google/callback"
+	googleRedirectURL         = "https://heychangju.shop/auth/google/callback"
 	googleUserInfoAPIEndpoint = "https://www.googleapis.com/oauth2/v3/userinfo"
 	googleScopeEmail          = "https://www.googleapis.com/auth/userinfo.email"
 	googleScopeProfile        = "https://www.googleapis.com/auth/userinfo.profile"
