@@ -21,12 +21,14 @@ import (
 	"github.com/110billion/usermanagerservice/src/internal/wrapper"
 	"github.com/110billion/usermanagerservice/src/pkg/server/auth/facebook"
 	"github.com/110billion/usermanagerservice/src/pkg/server/auth/google"
+	signIn "github.com/110billion/usermanagerservice/src/pkg/server/auth/signin"
 	"github.com/go-logr/logr"
 )
 
 type handler struct {
 	googleHandler   apiserver.APIHandler
 	facebookHandler apiserver.APIHandler
+	signInHandler   apiserver.APIHandler
 }
 
 // NewHandler instantiates a new apis handler
@@ -38,6 +40,13 @@ func NewHandler(parent wrapper.RouterWrapper, logger logr.Logger) (apiserver.API
 	if err := parent.Add(authWrapper); err != nil {
 		return nil, err
 	}
+
+	// /auth/signin
+	signInHandler, err := signIn.NewHandler(authWrapper, logger)
+	if err != nil {
+		return nil, err
+	}
+	handler.signInHandler = signInHandler
 
 	// /auth/google
 	googleHandler, err := google.NewHandler(authWrapper, logger)
