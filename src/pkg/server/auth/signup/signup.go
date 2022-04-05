@@ -21,6 +21,7 @@ type signUpReqBody struct {
 	Name     string `json:"name"`
 	Id       string `json:"id"`
 	Password string `json:"password"`
+	Salt     string `json:"salt"`
 }
 
 // NewHandler instantiates a new facebook api handler
@@ -46,7 +47,7 @@ func (h *handler) signUpHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if signUpReq.Id == "" || signUpReq.Email == "" || signUpReq.Password == "" || signUpReq.Name == "" {
+	if signUpReq.Id == "" || signUpReq.Email == "" || signUpReq.Password == "" || signUpReq.Name == "" || signUpReq.Salt == "" {
 		_ = utils.RespondError(w, http.StatusBadRequest, "request body is not in json form or is malformed")
 		return
 	}
@@ -75,7 +76,7 @@ func (h *handler) signUpHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Insert User
-	result, err := db.Exec("INSERT INTO USER_TABLE VALUES($1, $2, $3, $4)", signUpReq.Email, signUpReq.Name, signUpReq.Password, signUpReq.Id)
+	result, err := db.Exec("INSERT INTO USER_TABLE VALUES($1, $2, $3, $4, $5)", signUpReq.Email, signUpReq.Name, signUpReq.Password, signUpReq.Id, signUpReq.Salt)
 	if err != nil {
 		h.log.Error(err, "signup error")
 		_ = utils.RespondError(w, http.StatusBadRequest, "user registration error")
