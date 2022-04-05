@@ -9,6 +9,7 @@ import (
 	"github.com/110billion/usermanagerservice/src/pkg/server/database"
 	"github.com/go-logr/logr"
 	_ "github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
@@ -47,7 +48,7 @@ func (h *handler) signUpHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if signUpReq.Id == "" || signUpReq.Email == "" || signUpReq.Password == "" || signUpReq.Name == "" || signUpReq.Salt == "" {
+	if signUpReq.Id == "" || signUpReq.Email == "" || signUpReq.Password == "" || signUpReq.Name == "" {
 		_ = utils.RespondError(w, http.StatusBadRequest, "request body is not in json form or is malformed")
 		return
 	}
@@ -75,8 +76,10 @@ func (h *handler) signUpHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	password, _ := bcrypt.GenerateFromPassword([]byte(signUpReq.Password), bcrypt.DefaultCost)
+
 	// Insert User
-	result, err := db.Exec("INSERT INTO USER_TABLE VALUES($1, $2, $3, $4, $5)", signUpReq.Email, signUpReq.Name, signUpReq.Password, signUpReq.Id, signUpReq.Salt)
+	result, err := db.Exec("INSERT INTO USER_TABLE VALUES($1, $2, $3, $4)", signUpReq.Email, signUpReq.Name, password, signUpReq.Id)
 	if err != nil {
 		h.log.Error(err, "signup error")
 		_ = utils.RespondError(w, http.StatusBadRequest, "user registration error")

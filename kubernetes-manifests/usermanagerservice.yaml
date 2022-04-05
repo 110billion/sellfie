@@ -67,17 +67,14 @@ spec:
                 secretKeyRef:
                   name: db-secret
                   key: dbName
-          volumeMounts:
-            - mountPath: /etc/certs
-              name: tls-secret
-              readOnly: true
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret-key
       imagePullSecrets:
         - name: regcred
       volumes:
-        - name: tls-secret
-          secret:
-            defaultMode: 420
-            secretName: tls-secret
         - name: oauth-secret
           secret:
             defaultMode: 420
@@ -86,6 +83,10 @@ spec:
           secret:
             defaultMode: 420
             secretName: db-secret
+        - name: jwt-secret
+          secret:
+            defaultMode: 420
+            secretName: jwt-secret
 ---
 apiVersion: v1
 kind: Service
