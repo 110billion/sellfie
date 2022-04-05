@@ -19,7 +19,7 @@ package facebook
 import (
 	"github.com/110billion/usermanagerservice/src/internal/apiserver"
 	"github.com/110billion/usermanagerservice/src/internal/wrapper"
-	"github.com/110billion/usermanagerservice/src/pkg/server/login"
+	"github.com/110billion/usermanagerservice/src/pkg/server/auth/login"
 	"github.com/go-logr/logr"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"
