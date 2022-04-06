@@ -14,76 +14,73 @@
  limitations under the License.
 */
 
-package google
+package facebook
 
 import (
 	"github.com/110billion/usermanagerservice/src/internal/apiserver"
 	"github.com/110billion/usermanagerservice/src/internal/wrapper"
-	"github.com/110billion/usermanagerservice/src/pkg/server/auth/login"
+	"github.com/110billion/usermanagerservice/src/pkg/server/auth/social"
 	"github.com/go-logr/logr"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
+	"golang.org/x/oauth2/facebook"
 	"net/http"
 	"os"
 )
 
-const (
-	googleRedirectURL         = "https://heychangju.shop/auth/google/callback"
-	googleUserInfoAPIEndpoint = "https://www.googleapis.com/oauth2/v3/userinfo"
-	googleScopeEmail          = "https://www.googleapis.com/auth/userinfo.email"
-	googleScopeProfile        = "https://www.googleapis.com/auth/userinfo.profile"
+var (
+	facebookOauthConfig *oauth2.Config
 )
 
-var (
-	googleOauthConfig *oauth2.Config
+const (
+	facebookRedirectURL         = "https://heychangju.shop/auth/facebook/callback"
+	facebookUserInfoAPIEndpoint = "https://graph.facebook.com/me?fields=id,name,email"
 )
 
 type handler struct {
 	log logr.Logger
 }
 
-// InitGoogleOauthConfig set google Oauth2 config when server starts
-func InitGoogleOauthConfig() {
-	googleOauthConfig = &oauth2.Config{
-		ClientID:     os.Getenv("GOOGLE_ID"),
-		ClientSecret: os.Getenv("GOOGLE_SECRET"),
-		RedirectURL:  googleRedirectURL,
-		Scopes:       []string{googleScopeEmail, googleScopeProfile},
-		Endpoint:     google.Endpoint,
+// InitFacebookOauthConfig set facebook Oauth2 config when server starts
+func InitFacebookOauthConfig() {
+	facebookOauthConfig = &oauth2.Config{
+		ClientID:     os.Getenv("FACEBOOK_ID"),
+		ClientSecret: os.Getenv("FACEBOOK_SECRET"),
+		RedirectURL:  facebookRedirectURL,
+		Scopes:       []string{"email", "public_profile"},
+		Endpoint:     facebook.Endpoint,
 	}
 }
 
-// NewHandler instantiates a new google api handler
+// NewHandler instantiates a new facebook api handler
 func NewHandler(parent wrapper.RouterWrapper, logger logr.Logger) (apiserver.APIHandler, error) {
 	handler := &handler{log: logger}
 
-	// /google
-	googleWrapper := wrapper.New("/google", nil, nil)
-	if err := parent.Add(googleWrapper); err != nil {
+	// /facebook
+	facebookWrapper := wrapper.New("/facebook", nil, nil)
+	if err := parent.Add(facebookWrapper); err != nil {
 		return nil, err
 	}
 
-	// /google/login
+	// /facebook/login
 	loginWrapper := wrapper.New("/login", nil, handler.loginHandler)
-	if err := googleWrapper.Add(loginWrapper); err != nil {
+	if err := facebookWrapper.Add(loginWrapper); err != nil {
 		return nil, err
 	}
 
-	// /google/callback
+	// /facebook/callback
 	callbackWrapper := wrapper.New("/callback", nil, handler.callbackHandler)
-	if err := googleWrapper.Add(callbackWrapper); err != nil {
+	if err := facebookWrapper.Add(callbackWrapper); err != nil {
 		return nil, err
 	}
-
 	return handler, nil
 }
 
-// loginHandler handles redirection to google login
+// loginHandler handles redirection to facebook login
 func (h *handler) loginHandler(w http.ResponseWriter, r *http.Request) {
-	login.Login(w, r, googleOauthConfig)
+	social.Login(w, r, facebookOauthConfig)
 }
 
 // callbackHandler handles login check and redirection to main page
 func (h *handler) callbackHandler(w http.ResponseWriter, r *http.Request) {
-	login.Callback(w, r, googleOauthConfig, googleUserInfoAPIEndpoint)
+	social.Callback(w, r, facebookOauthConfig, facebookUserInfoAPIEndpoint)
 }
