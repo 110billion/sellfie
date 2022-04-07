@@ -32,6 +32,7 @@ import (
 // Response is common struct for responding login request
 type Response struct {
 	Ok    bool   `json:"ok"`
+	ID    string `json:"id"`
 	Token string `json:"token"`
 }
 
@@ -44,11 +45,11 @@ type logInReqBody struct {
 	Password string `json:"password"`
 }
 
-// NewHandler instantiates a new facebook api handler
+// NewHandler instantiates a new login api handler
 func NewHandler(parent wrapper.RouterWrapper, logger logr.Logger) (apiserver.APIHandler, error) {
 	handler := &handler{log: logger}
 
-	// /signup
+	// /login
 	logInWrapper := wrapper.New("/login", []string{http.MethodPost}, handler.logInHandler)
 	if err := parent.Add(logInWrapper); err != nil {
 		return nil, err
@@ -81,19 +82,13 @@ func (h *handler) logInHandler(w http.ResponseWriter, req *http.Request) {
 	}
 	defer db.Close()
 
-	var email string
-	if err = db.QueryRow("SELECT user_email FROM USER_TABLE WHERE user_email = $1", logInReq.Email).Scan(&email); err == sql.ErrNoRows {
+	var email, password, id string
+	if err = db.QueryRow("SELECT user_email, password, user_id FROM USER_TABLE WHERE user_email = $1", logInReq.Email).Scan(&email, &password, &id); err == sql.ErrNoRows {
 		h.log.Error(err, "login error")
 		_ = utils.RespondError(w, http.StatusBadRequest, "email not registered")
 		return
 	}
 
-	var password string
-	if err = db.QueryRow("SELECT password FROM USER_TABLE WHERE user_email = $1", logInReq.Email).Scan(&password); err == sql.ErrNoRows {
-		h.log.Error(err, "login error")
-		_ = utils.RespondError(w, http.StatusBadRequest, "internal error")
-		return
-	}
 	err = bcrypt.CompareHashAndPassword([]byte(password), []byte(logInReq.Password))
 	if err != nil {
 		h.log.Error(err, "login error")
@@ -108,5 +103,5 @@ func (h *handler) logInHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	_ = utils.RespondJSON(w, Response{Ok: true, Token: jwtToken})
+	_ = utils.RespondJSON(w, Response{Ok: true, Token: jwtToken, ID: id})
 }

@@ -41,7 +41,7 @@ type signUpReqBody struct {
 	Salt     string `json:"salt"`
 }
 
-// NewHandler instantiates a new facebook api handler
+// NewHandler instantiates a new signup api handler
 func NewHandler(parent wrapper.RouterWrapper, logger logr.Logger) (apiserver.APIHandler, error) {
 	handler := &handler{log: logger}
 
@@ -96,6 +96,14 @@ func (h *handler) signUpHandler(w http.ResponseWriter, req *http.Request) {
 
 	// Insert User
 	result, err := db.Exec("INSERT INTO USER_TABLE VALUES($1, $2, $3, $4)", signUpReq.Email, signUpReq.Name, password, signUpReq.Id)
+	if err != nil {
+		h.log.Error(err, "signup error")
+		_ = utils.RespondError(w, http.StatusBadRequest, "user registration error")
+		return
+	}
+
+	// Insert UserInfo
+	result, err = db.Exec("INSERT INTO USER_INFO VALUES($1, '',$2)", signUpReq.Id, signUpReq.Name)
 	if err != nil {
 		h.log.Error(err, "signup error")
 		_ = utils.RespondError(w, http.StatusBadRequest, "user registration error")
