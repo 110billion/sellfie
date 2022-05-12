@@ -10,7 +10,7 @@ IMG_USER_MANAGER ?= $(REGISTRY)/user-manager:$(VERSION)
 docker-build: docker-build-user-manager
 
 docker-build-user-manager:
-	docker build . -f build/Dockerfile -t ${IMG_USER_MANAGER}
+	docker build . -f usermanagerservice/Dockerfile -t ${IMG_USER_MANAGER}
 
 # Push the docker image
 .PHONY: docker-push
@@ -21,7 +21,7 @@ docker-push-user-manager:
 
 # Test code lint
 test-lint:
-	golint ./src/...
+	golint ./...
 
 # Unit test
 test-unit:

@@ -18,12 +18,12 @@ package server
 
 import (
 	"fmt"
-	"github.com/110billion/usermanagerservice/src/internal/apiserver"
-	"github.com/110billion/usermanagerservice/src/internal/utils"
-	"github.com/110billion/usermanagerservice/src/internal/wrapper"
-	"github.com/110billion/usermanagerservice/src/pkg/server/auth"
-	"github.com/110billion/usermanagerservice/src/pkg/server/auth/social/facebook"
-	"github.com/110billion/usermanagerservice/src/pkg/server/auth/social/google"
+	"github.com/110billion/sellfie/usermanagerservice/src/internal/apiserver"
+	"github.com/110billion/sellfie/usermanagerservice/src/internal/utils"
+	"github.com/110billion/sellfie/usermanagerservice/src/internal/wrapper"
+	"github.com/110billion/sellfie/usermanagerservice/src/pkg/server/auth"
+	"github.com/110billion/sellfie/usermanagerservice/src/pkg/server/auth/social/facebook"
+	"github.com/110billion/sellfie/usermanagerservice/src/pkg/server/auth/social/google"
 	"github.com/gorilla/mux"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"

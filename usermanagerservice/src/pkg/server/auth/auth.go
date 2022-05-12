@@ -17,13 +17,13 @@
 package auth
 
 import (
-	"github.com/110billion/usermanagerservice/src/internal/apiserver"
-	"github.com/110billion/usermanagerservice/src/internal/wrapper"
-	"github.com/110billion/usermanagerservice/src/pkg/server/auth/login"
-	"github.com/110billion/usermanagerservice/src/pkg/server/auth/signup"
-	"github.com/110billion/usermanagerservice/src/pkg/server/auth/social/facebook"
-	"github.com/110billion/usermanagerservice/src/pkg/server/auth/social/google"
-	"github.com/110billion/usermanagerservice/src/pkg/server/auth/userinfo"
+	"github.com/110billion/sellfie/usermanagerservice/src/internal/apiserver"
+	"github.com/110billion/sellfie/usermanagerservice/src/internal/wrapper"
+	"github.com/110billion/sellfie/usermanagerservice/src/pkg/server/auth/login"
+	"github.com/110billion/sellfie/usermanagerservice/src/pkg/server/auth/signup"
+	"github.com/110billion/sellfie/usermanagerservice/src/pkg/server/auth/social/facebook"
+	"github.com/110billion/sellfie/usermanagerservice/src/pkg/server/auth/social/google"
+	"github.com/110billion/sellfie/usermanagerservice/src/pkg/server/auth/userinfo"
 	"github.com/go-logr/logr"
 )
 

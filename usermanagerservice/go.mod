@@ -1,8 +1,9 @@
-module github.com/110billion/usermanagerservice
+module github.com/110billion/sellfie/usermanagerservice
 
 go 1.17
 
 require (
+	github.com/110billion/usermanagerservice v0.0.0-20220408043549-87fb0b3395ae
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-logr/logr v1.2.0
 	github.com/gorilla/mux v1.8.0

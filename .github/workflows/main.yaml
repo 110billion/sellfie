@@ -1,4 +1,4 @@
-name: usermanagerservice
+name: sellfie
 on:
   pull_request:
     branches:

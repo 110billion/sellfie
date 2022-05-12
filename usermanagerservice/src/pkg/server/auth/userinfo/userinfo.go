@@ -1,10 +1,10 @@
 package userinfo
 
 import (
-	"github.com/110billion/usermanagerservice/src/internal/apiserver"
-	"github.com/110billion/usermanagerservice/src/internal/utils"
-	"github.com/110billion/usermanagerservice/src/internal/wrapper"
-	"github.com/110billion/usermanagerservice/src/pkg/database"
+	"github.com/110billion/sellfie/usermanagerservice/src/internal/apiserver"
+	"github.com/110billion/sellfie/usermanagerservice/src/internal/utils"
+	"github.com/110billion/sellfie/usermanagerservice/src/internal/wrapper"
+	"github.com/110billion/sellfie/usermanagerservice/src/pkg/database"
 	"github.com/go-logr/logr"
 	"github.com/gorilla/mux"
 	"net/http"

@@ -18,8 +18,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/110billion/usermanagerservice/src/internal/logrotate"
-	"github.com/110billion/usermanagerservice/src/pkg/server"
+	"github.com/110billion/sellfie/usermanagerservice/src/internal/logrotate"
+	"github.com/110billion/sellfie/usermanagerservice/src/pkg/server"
 	"io"
 	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
