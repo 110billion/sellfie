@@ -29,12 +29,3 @@ docker-push-post-manager:
 # Test code lint
 test-lint:
 	golint ./...
-
-# Unit test
-test-unit: test-unit-user-manager test-unit-post-manager
-
-test-unit-user-manager:
-	go test -v ./usermanagerservice/...
-
-test-unit-post-manager:
-	go test -v ./postmanagerservice/...

@@ -9,15 +9,6 @@ on:
     tags:
       - v*
 jobs:
-  test_unit:
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
-        with:
-          go-version: 1.17.x
-      - name: unit test
-        run: make test-unit
   test_lint:
     runs-on: ubuntu-18.04
     steps:
